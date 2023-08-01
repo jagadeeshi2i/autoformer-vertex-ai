@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.0-devel-ubuntu18.04
+FROM pytorch/pytorch:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,24 +10,21 @@ RUN apt-get update  -y --fix-missing && \
     unrar \
     unzip \
     git && \
-    apt-get upgrade -y libstdc++6 && \
-    apt-get clean -y
+    apt-get upgrade -y libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
-    apt-get update && \
-    apt-get install -y gcc-9 && \
-    apt-get upgrade -y libstdc++6
+RUN pip install --upgrade pip
 
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    bash Miniconda3-latest-Linux-x86_64.sh -p /miniconda -b  && \
-    rm -rf Miniconda3-latest-Linux-x86_64.sh
+# Create user and set ownership and permissions as required
+RUN useradd -ms /bin/bash demo
+RUN mkdir /home/demo/app/ && chown -R demo:demo /home/demo/app
+WORKDIR /home/demo/app/
+USER demo
 
-ENV PATH=/miniconda/bin:${PATH}
-RUN conda update -y conda
+ENV PATH="/home/demo/.local/bin:${PATH}"
 
-RUN conda install -n base -c conda-forge mamba
+COPY --chown=demo:demo . .
 
-ADD ./environment.yml ./environment.yml
-RUN mamba env update -n base -f ./environment.yml && \
-    conda clean -afy
+RUN pip install --user --requirement requirements.txt
 
+CMD [ "/bin/bash"]
