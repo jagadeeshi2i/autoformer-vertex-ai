@@ -236,6 +236,7 @@ def pipeline():
         )
         .after(train_data_split)
         .set_display_name("train_task")
+        # https://cloud.google.com/vertex-ai/docs/pipelines/machine-types
         .add_node_selector_constraint('cloud.google.com/gke-accelerator', 'NVIDIA_TESLA_K80')
         .set_gpu_limit(1)
         )
