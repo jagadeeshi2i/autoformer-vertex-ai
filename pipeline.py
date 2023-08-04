@@ -13,9 +13,11 @@ from kfp.dsl import (
     component,
 )
 
+# Update below configs before running the pipeline
 PROJECT_ID = "kubeflow-394503"
 PIPELINE_ROOT = "gs://gcs_data_store"
 BASE_IMAGE = "jagadeeshj/autoformer:v2"
+LOCATION = "us-central1-a"
 
 aip.init(
     project=PROJECT_ID,
@@ -234,7 +236,9 @@ def pipeline():
         )
         .after(train_data_split)
         .set_display_name("train_task")
-    )
+        .add_node_selector_constraint('cloud.google.com/gke-accelerator', 'NVIDIA_TESLA_K80')
+        .set_gpu_limit(1)
+        )
 
 
 compiler.Compiler().compile(
@@ -248,6 +252,7 @@ job = aip.PipelineJob(
     # enable_caching=False,
     template_path="pipeline.json",
     pipeline_root=PIPELINE_ROOT,
+    location=LOCATION
 )
 
 job.run()
