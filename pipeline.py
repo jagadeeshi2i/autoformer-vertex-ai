@@ -17,7 +17,7 @@ from kfp.dsl import (
 PROJECT_ID = "kubeflow-394503"
 PIPELINE_ROOT = "gs://gcs_data_store"
 BASE_IMAGE = "jagadeeshj/autoformer:v2"
-LOCATION = "us-central1-a"
+LOCATION = "us-central1"
 
 aip.init(
     project=PROJECT_ID,
@@ -278,7 +278,7 @@ def pipeline():
         set_display_name("train_task").
         set_gpu_limit(1).
         # The name of the accelerator, such as ``'NVIDIA_TESLA_K80'``, ``'TPU_V3'``, ``'nvidia.com/gpu'`` or ``'cloud-tpus.google.com/v3'``.
-        add_node_selector_constraint('nvidia.com/gpu')
+        add_node_selector_constraint('NVIDIA_TESLA_K80')
         )
 
     test_task = (
