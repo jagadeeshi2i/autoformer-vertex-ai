@@ -90,7 +90,7 @@ class Exp_Main(Exp_Basic):
 
     def train(self, train_data, train_loader, vali_data, vali_loader, test_data, test_loader, setting):
         
-        path = os.path.join(self.args.checkpoints, setting)
+        path = setting
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -184,15 +184,14 @@ class Exp_Main(Exp_Basic):
 
         return
 
-    def test(self, setting, test=0):
-        test_data, test_loader = self._get_data(flag='test')
+    def test(self, test_loader, model, test_results, results, setting, test=0):
         if test:
             print('loading model')
-            self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth')))
+            self.model.load_state_dict(torch.load(model))
 
         preds = []
         trues = []
-        folder_path = './test_results/' + setting + '/'
+        folder_path = test_results + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
@@ -247,7 +246,7 @@ class Exp_Main(Exp_Basic):
         print('test shape:', preds.shape, trues.shape)
 
         # result save
-        folder_path = './results/' + setting + '/'
+        folder_path = results + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 

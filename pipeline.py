@@ -93,9 +93,11 @@ def train(
     test_data: InputPath(),
     test_loader: InputPath(),
     args: dict,
-    model_out: OutputPath(),
+    checkpoint_path: OutputPath(),
+    exp_object: OutputPath()
 ):
     import torch
+    import pickle
     import argparse
     from exp.exp_main import Exp_Main
 
@@ -119,11 +121,50 @@ def train(
         vali_loader,
         test_data,
         test_loader,
-        model_out,
+        checkpoint_path,
     )
+
+    with open(exp_object, 'wb') as file:
+        pickle.dump(exp, file)
 
     return
 
+@component(
+    base_image=BASE_IMAGE,
+)
+def test(
+    test_loader: InputPath(),
+    exp_object: InputPath(),
+    model: InputPath(),
+    test_results: OutputPath(),
+    results: OutputPath(),
+    # args: dict,
+    checkpoint_path: OutputPath(),
+):
+    import pickle
+    import torch
+    # import argparse
+
+    # parser = argparse.Namespace()
+
+    # for key, value in args.items():
+    #     setattr(parser, key, value)
+
+    test_loader = torch.load(test_loader)
+
+    with open(exp_object, 'rb') as file:      
+        exp = pickle.load(file)
+
+    exp.test(
+        test_loader,
+        model, 
+        test_results, 
+        results, 
+        checkpoint_path,
+        0
+    )
+
+    return
 
 @dsl.pipeline(
     # Default pipeline root. You can override it when submitting the pipeline.
@@ -241,6 +282,15 @@ def pipeline():
         .set_gpu_limit(1)
         )
 
+    test_task = (
+        test(
+            test_loader=test_data_split.outputs["dataloader"],
+            model=train_task.outputs["checkpoint_path"],
+            args=params,
+        )
+        .after(train_task)
+        .set_display_name("test_task")
+        )
 
 compiler.Compiler().compile(
     pipeline_func=pipeline,
