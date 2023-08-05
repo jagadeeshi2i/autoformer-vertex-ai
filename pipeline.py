@@ -205,7 +205,7 @@ def pipeline():
         "num_workers": 10,
         "itr": 2,
         "train_epochs": 1,
-        "batch_size": 2,
+        "batch_size": 1,
         "patience": 3,
         "learning_rate": 0.0001,
         "des": "test",
@@ -273,12 +273,12 @@ def pipeline():
             test_data=test_data_split.outputs["dataset"],
             test_loader=test_data_split.outputs["dataloader"],
             args=params,
-        ).
-        after(train_data_split).
-        set_display_name("train_task").
-        set_gpu_limit(1).
+        )
+        .after(train_data_split)
+        .set_display_name("train_task")
+        .set_gpu_limit(2)
         # The name of the accelerator, such as ``'NVIDIA_TESLA_K80'``, ``'TPU_V3'``, ``'nvidia.com/gpu'`` or ``'cloud-tpus.google.com/v3'``.
-        add_node_selector_constraint('NVIDIA_TESLA_K80')
+        .add_node_selector_constraint('nvidia.com/gpu')
         )
 
     test_task = (
