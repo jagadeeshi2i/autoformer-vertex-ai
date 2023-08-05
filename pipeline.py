@@ -276,8 +276,8 @@ def pipeline():
         ).
         after(train_data_split).
         set_display_name("train_task").
-        # https://cloud.google.com/vertex-ai/docs/pipelines/machine-types
         set_gpu_limit(1).
+        # The name of the accelerator, such as ``'NVIDIA_TESLA_K80'``, ``'TPU_V3'``, ``'nvidia.com/gpu'`` or ``'cloud-tpus.google.com/v3'``.
         add_node_selector_constraint('nvidia.com/gpu')
         )
 
