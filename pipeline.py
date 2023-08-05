@@ -138,7 +138,6 @@ def test(
     model: InputPath(),
     test_results: OutputPath(),
     results: OutputPath(),
-    # args: dict,
     checkpoint_path: OutputPath(),
 ):
     import pickle
@@ -274,19 +273,19 @@ def pipeline():
             test_data=test_data_split.outputs["dataset"],
             test_loader=test_data_split.outputs["dataloader"],
             args=params,
-        )
-        .after(train_data_split)
-        .set_display_name("train_task")
+        ).
+        after(train_data_split).
+        set_display_name("train_task").
         # https://cloud.google.com/vertex-ai/docs/pipelines/machine-types
-        .add_node_selector_constraint('cloud.google.com/gke-accelerator', 'NVIDIA_TESLA_K80')
-        .set_gpu_limit(1)
+        set_gpu_limit(1).
+        add_node_selector_constraint('nvidia.com/gpu')
         )
 
     test_task = (
         test(
             test_loader=test_data_split.outputs["dataloader"],
+            exp_object=train_task.outputs["exp_object"],
             model=train_task.outputs["checkpoint_path"],
-            args=params,
         )
         .after(train_task)
         .set_display_name("test_task")
